@@ -15,9 +15,31 @@ int main(){
 	
   init();
   Serial.begin(9600);
-  
+
   
   while(1){
+  	int opcion = 0;
+  	short int panel_LED[8][8] = {};
+  	for(int i = 0; i < 8; i++){
+      		for(int j = 0; j < 8; j++){
+       	    		panel_LED[i][j] = 0;
+      		}
+ 	 }
+ 	cout << "opcion 1 -> Verificacion"<<endl;
+  	cout << "opcion 2 -> Mostrar un solo patron"<<endl;
+  	cout << "opcion 3 -> Mostrar una secuencia de patrones"<<endl;
+  	cout << "Elija una opcion -> ";
+  	cin >> opcion;
+	switch (opcion) {
+       		 case 1 :{Verificacion();
+       		         break;}
+        	 case 2 :{imagen(panel_LED);
+                 	 break;}   
+        	 case 3 :{pubik();
+                 	 break;}  
+        	default:{cout << "Ingreso una opcion incorrecta, por favor vuelva a 			ingresar -> ";
+                 	cin >> opcion;}
+    	}
   }
 }
 
