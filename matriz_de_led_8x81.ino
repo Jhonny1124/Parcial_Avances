@@ -25,21 +25,33 @@ int main(){
        	    		panel_LED[i][j] = 0;
       		}
  	 }
- 	cout << "opcion 1 -> Verificacion"<<endl;
-  	cout << "opcion 2 -> Mostrar un solo patron"<<endl;
-  	cout << "opcion 3 -> Mostrar una secuencia de patrones"<<endl;
-  	cout << "Elija una opcion -> ";
-  	cin >> opcion;
-	switch (opcion) {
-       		 case 1 :{Verificacion();
-       		         break;}
-        	 case 2 :{imagen(panel_LED);
-                 	 break;}   
-        	 case 3 :{pubik();
-                 	 break;}  
-        	default:{cout << "Ingreso una opcion incorrecta, por favor vuelva a 			ingresar -> ";
-                 	cin >> opcion;}
-    	}
+ 	Serial.println("opcion 1 -> Verificacion");
+  	Serial.println("opcion 2 -> Mostrar un solo patron");
+  	Serial.println("opcion 3 -> Mostrar una secuencia de patrones");
+    Serial.println("opcion 4 -> Limpiar patron de la matriz LED");
+  	Serial.print("Elija una opcion -> ");
+  	while(Serial.available()==0);						   
+  	opcion = Serial.parseInt();
+  	Serial.println(opcion);
+	switch (opcion) 
+    {
+      case 1 :{Verificacion();
+               Limpieza_Pantalla();
+               break;}
+      case 2 :{imagen(panel_LED);
+               Limpieza_Pantalla();
+               break;}   
+      case 3 :{Pubik();
+               Limpieza_Pantalla();
+               break;} 
+      case 4 :{Verificacion();
+               Limpieza_Pantalla();
+               break;} 
+      default:{Serial.println("Ingreso una opcion incorrecta, por favor vuelva a ingresar -> ");
+               while(Serial.available()==0);						   
+               opcion = Serial.parseInt();
+               Serial.println(opcion);}
+    }
   }
 }
 
@@ -74,7 +86,20 @@ void Verificacion(){
       digitalWrite(RCLK, 0);digitalWrite(RCLK, 1);digitalWrite(RCLK, 0);
     }
   }
+  delay(2000);
    /** El ciclo anterior sirve para encender todos los LED's a la vez**/
+  for(int f = 0; f < 8; f++){
+    for(int c = 0; c < 8; c++){
+      matriz_LED[f][c]=0;
+    }
+  }
+  for(int f = 0; f < 8; f++){
+    for(int c = 0; c < 8; c++){
+      digitalWrite(SER, matriz_LED[f][c]);
+      digitalWrite(SRCLK, 0);digitalWrite(SRCLK, 1);digitalWrite(SRCLK, 0);
+      digitalWrite(RCLK, 0);digitalWrite(RCLK, 1);digitalWrite(RCLK, 0);
+    }
+  }
 }
 
 void imagen (short int panel_LED[8][8]){
@@ -280,7 +305,7 @@ void Realizando_Dibujo(char patrones [8][8]){
 
 void Pubik()
 { 
-    int n = 0, cont2 = -1, seg = 0;
+    int n = 0, cont = 0, cont2 = -1, seg = 0, cantidad_c = 0;
   
     Serial.print("Ingrese la cantidad de patrones que desea mostrar -> ");
     while(Serial.available()==0);						   
@@ -291,12 +316,18 @@ void Pubik()
     while(Serial.available()==0);						   
     seg = Serial.parseInt();
     Serial.println(seg);
+  
+  	Serial.print("Ingrese la cantidad de veces que desea ver el ciclo -> ");
+    while(Serial.available()==0);						   
+    cantidad_c= Serial.parseInt();
+    Serial.println(cantidad_c);
    /**Hata este punto la funcion lo que hace es pedirle al usuario el numero
    de patrones que desea ingresar y la cantidad de tiempo que desea entre
    los patrones**/
   
     int *Pointer_Secue = new int [n*64];
-    /**Se reserva espacio en el Heap dependiendo de la cantidad de patrones que desee el usuario**/
+    /**Se reserva espacio en el Heap dependiendo de la cantidad de
+    patrones que desee el usuario**/
     char patrones[8][8]={};
     Muestra_posiciones();
     delay(2000);
@@ -326,18 +357,20 @@ void Pubik()
   /**En el ciclo anterior se van creando los patrones que desea mostrar el usuario
   con ayuda de la funcion Realizando_Dibujo y ademas se van agregando los patrones en orden al espacio de memoria en el Heap(se agregan los patrone como 1 y 0
 siendo 1 un High y 0 un Low )**/
-  while(1){
-  int div = 1;
-    for(int i = 0; i < (n*64); i++){
-      digitalWrite(SER, *(Pointer_Secue + i));
-      digitalWrite(SRCLK, 0);digitalWrite(SRCLK, 1);digitalWrite(SRCLK, 0);
-      digitalWrite(RCLK, 0);digitalWrite(RCLK, 1);digitalWrite(RCLK, 0);
-      if((i%64) == 0){
-      	div++;
-        delay(seg*1000);
+  while(cont < cantidad_c){
+    cont++;
+    int div = 0;
+      for(int i = 0; i < (n*64); i++){
+        div++;
+        digitalWrite(SER, *(Pointer_Secue + i));
+        digitalWrite(SRCLK, 0);digitalWrite(SRCLK, 1);digitalWrite(SRCLK, 0);
+        digitalWrite(RCLK, 0);digitalWrite(RCLK, 1);digitalWrite(RCLK, 0);
+        if(div == 64){
+          div = 0;
+          delay(seg*1000);
+        }
       }
     }
-    }
       /**El ciclo anterior encienden los patrones que puso el usuario y que hasta el momento estan almacenados en el Heap**/
-    delete (Pointer_Secue);
+    free (Pointer_Secue);
 }
